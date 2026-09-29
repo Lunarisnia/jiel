@@ -1,8 +1,14 @@
 #pragma once
-class Application {
-public:
-  Application();
 
-public:
-  void Init();
+struct WindowSize {
+    int Width;
+    int Height;
+};
+
+class Application {
+  public:
+    Application();
+
+  public:
+    void Init();
 };

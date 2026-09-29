@@ -1,4 +1,4 @@
 #pragma once
 class Graphics {
-public:
+  public:
 };

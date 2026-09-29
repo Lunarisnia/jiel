@@ -12,4 +12,11 @@ target_include_directories(jiel_engine
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
+target_link_libraries(jiel_engine
+    PRIVATE
+        fmt::fmt
+        glad_gl_core_41
+        SDL3::SDL3
+)
+
 jiel_enable_warnings(jiel_engine)
