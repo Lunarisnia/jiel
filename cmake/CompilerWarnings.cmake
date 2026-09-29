@@ -1,0 +1,11 @@
+function(jiel_enable_warnings target)
+    if(NOT JIEL_ENABLE_WARNINGS)
+        return()
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+    elseif(MSVC)
+        target_compile_options(${target} PRIVATE /W4 /permissive-)
+    endif()
+endfunction()
