@@ -25,6 +25,8 @@ if(JIEL_ENABLE_SANITIZERS
     add_link_options(-fsanitize=address,undefined)
 endif()
 
+add_subdirectory(src)
+
 if(JIEL_BUILD_APPS)
     add_subdirectory(apps)
 endif()

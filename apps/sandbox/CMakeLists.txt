@@ -4,6 +4,7 @@ target_link_libraries(jiel
     PRIVATE
         fmt::fmt
         glad_gl_core_41
+        jiel::engine
         OpenGL::GL
         SDL3::SDL3
 )
