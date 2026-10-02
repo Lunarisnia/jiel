@@ -12,6 +12,29 @@ constexpr WindowSize WINDOW_SIZE = {
 };
 
 void Application::Init() {
+    createWindow();
+    createOpenGLContext();
+
+    bool running = true;
+    while (running) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT) {
+                running = false;
+            }
+        }
+
+        int width = 0;
+        int height = 0;
+        SDL_GetWindowSizeInPixels(window, &width, &height);
+        glViewport(0, 0, width, height);
+        glClearColor(1.0f, 0.075F, 0.11F, 1.0F);
+        glClear(GL_COLOR_BUFFER_BIT);
+        SDL_GL_SwapWindow(window);
+    }
+}
+
+void Application::createWindow() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         fmt::println("Failed to initialize video: {}", SDL_GetError());
         return;
@@ -31,7 +54,7 @@ void Application::Init() {
 #endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, context_flags);
 
-    SDL_Window* window =
+    window =
         SDL_CreateWindow("jiel", WINDOW_SIZE.Width, WINDOW_SIZE.Height,
                          SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (window == nullptr) {
@@ -39,8 +62,10 @@ void Application::Init() {
         SDL_Quit();
         return;
     }
+}
 
-    SDL_GLContext context = SDL_GL_CreateContext(window);
+void Application::createOpenGLContext() {
+    context = SDL_GL_CreateContext(window);
     if (context == nullptr) {
         fmt::println("Could not create an OpenGL context: {}", SDL_GetError());
         SDL_DestroyWindow(window);
@@ -58,25 +83,9 @@ void Application::Init() {
 
     SDL_GL_SetSwapInterval(1);
     fmt::print("OpenGL {}\n", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+}
 
-    bool running = true;
-    while (running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT) {
-                running = false;
-            }
-        }
-
-        int width = 0;
-        int height = 0;
-        SDL_GetWindowSizeInPixels(window, &width, &height);
-        glViewport(0, 0, width, height);
-        glClearColor(1.0f, 0.075F, 0.11F, 1.0F);
-        glClear(GL_COLOR_BUFFER_BIT);
-        SDL_GL_SwapWindow(window);
-    }
-
+Application::~Application() {
     SDL_GL_DestroyContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();
