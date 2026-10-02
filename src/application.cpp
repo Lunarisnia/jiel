@@ -1,4 +1,10 @@
 #include "application.hpp"
+#include "SDL3/SDL_stdinc.h"
+#include "SDL3/SDL_time.h"
+#include "SDL3/SDL_timer.h"
+#include "SDL3/SDL_video.h"
+#include "fmt/format.h"
+#include "math/vec3.hpp"
 
 #include <SDL3/SDL.h>
 #include <array>
@@ -14,27 +20,46 @@ constexpr WindowSize WINDOW_SIZE = {
 
 GLuint shaderProgram = 0;
 GLuint triangleVAO = 0;
+GLuint triangleVAO2 = 0;
 
 void setupDrawTriangle() {
     // clang-format off
-    std::array<float, 9> points = {
-      0.0f, 0.5f, 0.0f,
-      0.5f, -0.5f, 0.0f,
-      -0.5f, -0.5f, 0.0f
+    std::array<math::Vec3, 3> points = {
+      math::Vec3(0.0f, 0.5f, 0.0f),
+      math::Vec3(0.5f, -0.5f, 0.0f),
+      math::Vec3(-0.5f, -0.5f, 0.0f),
+    };
+    std::array<math::Vec3, 3> points2 = {
+      math::Vec3(0.5f, 0.5f, 0.0f),
+      math::Vec3(1.0f, -0.5f, 0.0f),
+      math::Vec3(0.0f, -0.5f, 0.0f),
     };
     // clang-format on
 
     GLuint triangleVBO = 0;
     glGenBuffers(1, &triangleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(float)),
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(math::Vec3)),
                  points.data(), GL_STATIC_DRAW);
+
+    GLuint triangleVBO2 = 0;
+    glGenBuffers(1, &triangleVBO2);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO2);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points2.size() * sizeof(math::Vec3)),
+                 points2.data(), GL_STATIC_DRAW);
 
     triangleVAO = 0;
     glGenVertexArrays(1, &triangleVAO);
     glBindVertexArray(triangleVAO);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    triangleVAO2 = 0;
+    glGenVertexArrays(1, &triangleVAO2);
+    glBindVertexArray(triangleVAO2);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO2);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
     const char* vertexShader = "#version 410 core\n"
@@ -67,6 +92,30 @@ void drawTriangle() {
     glBindVertexArray(triangleVAO);
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glBindVertexArray(triangleVAO2);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+double getTime() {
+    return static_cast<double>(SDL_GetTicks()) / 1000.0f;
+}
+
+double prevTick;
+double fpsCooldown = 0.1f;
+void fpsCounter(SDL_Window* window) {
+    double currentTick = getTime();
+
+    double elapsedTick = currentTick - prevTick;
+    prevTick = currentTick;
+
+    fpsCooldown -= elapsedTick;
+    if (fpsCooldown < 0.0f && elapsedTick > 0.0f) {
+        double fps = 1.0f / elapsedTick;
+
+        SDL_SetWindowTitle(window, fmt::format("FPS: {}", fps).c_str());
+        fpsCooldown = 0.1f;
+    }
 }
 
 void Application::Init() {
@@ -75,6 +124,7 @@ void Application::Init() {
 
     setupDrawTriangle();
 
+    prevTick = getTime();
     bool running = true;
     while (running) {
         SDL_Event event;
@@ -92,6 +142,8 @@ void Application::Init() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         drawTriangle();
+
+        fpsCounter(window);
 
         SDL_GL_SwapWindow(window);
     }

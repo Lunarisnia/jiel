@@ -1,6 +1,6 @@
 #pragma once
 
-namespace swr::math {
+namespace math {
 
 constexpr double SignedTriangleArea(int ax, int ay, int bx, int by, int cx, int cy)
 {
@@ -8,4 +8,4 @@ constexpr double SignedTriangleArea(int ax, int ay, int bx, int by, int cx, int 
                   (ay - cy) * (ax + cx));
 }
 
-} // namespace swr::math
+} // namespace math

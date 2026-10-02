@@ -1,6 +1,6 @@
 #pragma once
 
-#include "swr/math/vec3.hpp"
+#include "math/vec3.hpp"
 
 #include <array>
 #include <cassert>
@@ -8,7 +8,7 @@
 #include <limits>
 #include <optional>
 
-namespace swr::math {
+namespace math {
 
 class Mat3 {
 public:
@@ -155,4 +155,4 @@ private:
     std::array<float, 9> m_{};
 };
 
-} // namespace swr::math
+} // namespace math

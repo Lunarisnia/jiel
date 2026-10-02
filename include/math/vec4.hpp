@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace swr::math {
+namespace math {
 
 class Vec4 {
 public:
@@ -62,4 +62,4 @@ private:
     float w_{};
 };
 
-} // namespace swr::math
+} // namespace math
