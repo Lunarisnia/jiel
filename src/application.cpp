@@ -8,8 +8,10 @@
 
 #include <SDL3/SDL.h>
 #include <array>
+#include <cstdio>
 #include <fmt/base.h>
 #include <glad/gl.h>
+#include <string>
 
 Application::Application() = default;
 
@@ -21,6 +23,42 @@ constexpr WindowSize WINDOW_SIZE = {
 GLuint shaderProgram = 0;
 GLuint triangleVAO = 0;
 GLuint triangleVAO2 = 0;
+
+bool checkShaderCompilation(GLuint shader, const char* name) {
+    GLint compiled = GL_FALSE;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled == GL_TRUE) {
+        return true;
+    }
+
+    GLint logLength = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+
+    std::string log(static_cast<std::size_t>(logLength), '\0');
+    GLsizei written = 0;
+    glGetShaderInfoLog(shader, logLength, &written, log.data());
+    log.resize(static_cast<std::size_t>(written));
+    fmt::println(stderr, "{} shader compilation failed:\n{}", name, log);
+    return false;
+}
+
+bool checkProgramLink(GLuint program) {
+    GLint linked = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked == GL_TRUE) {
+        return true;
+    }
+
+    GLint logLength = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+
+    std::string log(static_cast<std::size_t>(logLength), '\0');
+    GLsizei written = 0;
+    glGetProgramInfoLog(program, logLength, &written, log.data());
+    log.resize(static_cast<std::size_t>(written));
+    fmt::println(stderr, "Shader program link failed:\n{}", log);
+    return false;
+}
 
 void setupDrawTriangle() {
     // clang-format off
@@ -77,14 +115,32 @@ void setupDrawTriangle() {
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertexShader, NULL);
     glCompileShader(vs);
+    if (!checkShaderCompilation(vs, "Vertex")) {
+        glDeleteShader(vs);
+        return;
+    }
+
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragmentShader, NULL);
     glCompileShader(fs);
+    if (!checkShaderCompilation(fs, "Fragment")) {
+        glDeleteShader(fs);
+        glDeleteShader(vs);
+        return;
+    }
 
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, fs);
     glAttachShader(shaderProgram, vs);
     glLinkProgram(shaderProgram);
+
+    glDeleteShader(fs);
+    glDeleteShader(vs);
+
+    if (!checkProgramLink(shaderProgram)) {
+        glDeleteProgram(shaderProgram);
+        shaderProgram = 0;
+    }
 }
 
 void drawTriangle() {
