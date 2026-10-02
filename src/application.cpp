@@ -1,6 +1,7 @@
 #include "application.hpp"
 
 #include <SDL3/SDL.h>
+#include <array>
 #include <fmt/base.h>
 #include <glad/gl.h>
 
@@ -11,9 +12,68 @@ constexpr WindowSize WINDOW_SIZE = {
     .Height = 720,
 };
 
+GLuint shaderProgram = 0;
+GLuint triangleVAO = 0;
+
+void setupDrawTriangle() {
+    // clang-format off
+    std::array<float, 9> points = {
+      0.0f, 0.5f, 0.0f,
+      0.5f, -0.5f, 0.0f,
+      -0.5f, -0.5f, 0.0f
+    };
+    // clang-format on
+
+    GLuint triangleVBO = 0;
+    glGenBuffers(1, &triangleVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(float)),
+                 points.data(), GL_STATIC_DRAW);
+
+    triangleVAO = 0;
+    glGenVertexArrays(1, &triangleVAO);
+    glBindVertexArray(triangleVAO);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    const char* vertexShader = "#version 410 core\n"
+                               "in vec3 vp;"
+                               "void main() {"
+                               "  gl_Position = vec4( vp, 1.0 );"
+                               "}";
+
+    const char* fragmentShader = "#version 410 core\n"
+                                 "out vec4 frag_colour;"
+                                 "void main() {"
+                                 "  frag_colour = vec4( 0.5, 0.0, 0.5, 1.0 );"
+                                 "}";
+
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs, 1, &vertexShader, NULL);
+    glCompileShader(vs);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, &fragmentShader, NULL);
+    glCompileShader(fs);
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, fs);
+    glAttachShader(shaderProgram, vs);
+    glLinkProgram(shaderProgram);
+}
+
+void drawTriangle() {
+    glUseProgram(shaderProgram);
+    glBindVertexArray(triangleVAO);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
 void Application::Init() {
     createWindow();
     createOpenGLContext();
+
+    setupDrawTriangle();
 
     bool running = true;
     while (running) {
@@ -28,8 +88,11 @@ void Application::Init() {
         int height = 0;
         SDL_GetWindowSizeInPixels(window, &width, &height);
         glViewport(0, 0, width, height);
-        glClearColor(1.0f, 0.075F, 0.11F, 1.0F);
+        glClearColor(0.075f, 0.075F, 0.11F, 1.0F);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        drawTriangle();
+
         SDL_GL_SwapWindow(window);
     }
 }
