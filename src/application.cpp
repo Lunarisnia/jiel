@@ -22,6 +22,7 @@ constexpr WindowSize WINDOW_SIZE = {
 
 GLuint shaderProgram = 0;
 GLuint triangleVAO = 0;
+GLuint triangleEBO = 0;
 GLuint triangleVAO2 = 0;
 
 bool checkShaderCompilation(GLuint shader, const char* name) {
@@ -62,15 +63,23 @@ bool checkProgramLink(GLuint program) {
 
 void setupDrawTriangle() {
     // clang-format off
-    std::array<math::Vec3, 3> points = {
-      math::Vec3(0.0f, 0.5f, 0.0f),
-      math::Vec3(0.5f, -0.5f, 0.0f),
+    std::array<math::Vec3, 6> points = {
+      math::Vec3(-0.5f, 0.5f, 0.0f),
       math::Vec3(-0.5f, -0.5f, 0.0f),
+      math::Vec3(0.5f, -0.5f, 0.0f),
+
+      math::Vec3(0.5f, 0.5f, 0.0f),
+      math::Vec3(-0.5f, 0.5f, 0.0f),
+      math::Vec3(0.5f, -0.5f, 0.0f),
     };
     std::array<math::Vec3, 3> points2 = {
       math::Vec3(0.5f, 0.5f, 0.0f),
       math::Vec3(1.0f, -0.5f, 0.0f),
       math::Vec3(0.0f, -0.5f, 0.0f),
+    };
+    std::array<int, 6> pointIndice1 = {
+        0,1,2,
+        2,3,0,
     };
     // clang-format on
 
@@ -79,6 +88,11 @@ void setupDrawTriangle() {
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(math::Vec3)),
                  points.data(), GL_STATIC_DRAW);
+
+    // TODO: does not work, debug it on renderdoc
+    glGenBuffers(1, &triangleEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, pointIndice1.size(), pointIndice1.data(), GL_STATIC_DRAW);
 
     GLuint triangleVBO2 = 0;
     glGenBuffers(1, &triangleVBO2);
@@ -91,6 +105,7 @@ void setupDrawTriangle() {
     glBindVertexArray(triangleVAO);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
     triangleVAO2 = 0;
@@ -145,9 +160,9 @@ void setupDrawTriangle() {
 
 void drawTriangle() {
     glUseProgram(shaderProgram);
-    glBindVertexArray(triangleVAO);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(triangleVAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(triangleVAO2);
     glDrawArrays(GL_TRIANGLES, 0, 3);
