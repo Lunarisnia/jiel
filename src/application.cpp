@@ -1,6 +1,4 @@
 #include "application.hpp"
-#include "SDL3/SDL_stdinc.h"
-#include "SDL3/SDL_time.h"
 #include "SDL3/SDL_timer.h"
 #include "SDL3/SDL_video.h"
 #include "fmt/format.h"
@@ -77,7 +75,7 @@ void setupDrawTriangle() {
       math::Vec3(1.0f, -0.5f, 0.0f),
       math::Vec3(0.0f, -0.5f, 0.0f),
     };
-    std::array<int, 6> pointIndice1 = {
+    std::array<GLuint, 6> pointIndice1 = {
         0,1,2,
         2,3,0,
     };
@@ -89,10 +87,10 @@ void setupDrawTriangle() {
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(math::Vec3)),
                  points.data(), GL_STATIC_DRAW);
 
-    // TODO: does not work, debug it on renderdoc
     glGenBuffers(1, &triangleEBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, pointIndice1.size(), pointIndice1.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, pointIndice1.size() * sizeof(pointIndice1[0]),
+                 pointIndice1.data(), GL_STATIC_DRAW);
 
     GLuint triangleVBO2 = 0;
     glGenBuffers(1, &triangleVBO2);
