@@ -32,6 +32,7 @@ GLuint triangleVAO2 = 0;
 Shader* basicShader;
 Mesh* triangle;
 
+// TODO: implement a mesh loader
 void setupDrawTriangle() {
     // clang-format off
     std::array<math::Vec3, 6> points = {
@@ -70,10 +71,12 @@ void drawTriangle() {
     triangle->Draw();
 }
 
+// TODO: move this to a util library
 double getTime() {
     return static_cast<double>(SDL_GetTicks()) / 1000.0f;
 }
 
+// TODO: should this be here?
 double prevTick;
 double fpsCooldown = 0.1f;
 void fpsCounter(SDL_Window* window) {
