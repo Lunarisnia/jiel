@@ -4,6 +4,7 @@
 #include "file.hpp"
 #include "fmt/format.h"
 #include "graphics/mesh.hpp"
+#include "graphics/shader.hpp"
 #include "math/vec3.hpp"
 
 #include <SDL3/SDL.h>
@@ -25,43 +26,8 @@ GLuint triangleVAO = 0;
 GLuint triangleEBO = 0;
 GLuint triangleVAO2 = 0;
 
+Shader* basicShader;
 Mesh* triangle;
-
-bool checkShaderCompilation(GLuint shader, const char* name) {
-    GLint compiled = GL_FALSE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled == GL_TRUE) {
-        return true;
-    }
-
-    GLint logLength = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-
-    std::string log(static_cast<std::size_t>(logLength), '\0');
-    GLsizei written = 0;
-    glGetShaderInfoLog(shader, logLength, &written, log.data());
-    log.resize(static_cast<std::size_t>(written));
-    fmt::println(stderr, "{} shader compilation failed:\n{}", name, log);
-    return false;
-}
-
-bool checkProgramLink(GLuint program) {
-    GLint linked = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    if (linked == GL_TRUE) {
-        return true;
-    }
-
-    GLint logLength = 0;
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-
-    std::string log(static_cast<std::size_t>(logLength), '\0');
-    GLsizei written = 0;
-    glGetProgramInfoLog(program, logLength, &written, log.data());
-    log.resize(static_cast<std::size_t>(written));
-    fmt::println(stderr, "Shader program link failed:\n{}", log);
-    return false;
-}
 
 void setupDrawTriangle() {
     // clang-format off
@@ -87,42 +53,16 @@ void setupDrawTriangle() {
 
     const std::string vertexShaderSource = File::LoadFile("apps/sandbox/shaders/vertex.vert");
     const std::string fragmentShaderSource = File::LoadFile("apps/sandbox/shaders/fragment.frag");
-    const char* vertexShader = vertexShaderSource.c_str();
-    const char* fragmentShader = fragmentShaderSource.c_str();
 
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertexShader, NULL);
-    glCompileShader(vs);
-    if (!checkShaderCompilation(vs, "Vertex")) {
-        glDeleteShader(vs);
-        return;
-    }
+    basicShader = new Shader{};
+    basicShader->Add(vertexShaderSource, GL_VERTEX_SHADER);
+    basicShader->Add(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragmentShader, NULL);
-    glCompileShader(fs);
-    if (!checkShaderCompilation(fs, "Fragment")) {
-        glDeleteShader(fs);
-        glDeleteShader(vs);
-        return;
-    }
-
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, fs);
-    glAttachShader(shaderProgram, vs);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(fs);
-    glDeleteShader(vs);
-
-    if (!checkProgramLink(shaderProgram)) {
-        glDeleteProgram(shaderProgram);
-        shaderProgram = 0;
-    }
+    basicShader->Compile();
 }
 
 void drawTriangle() {
-    glUseProgram(shaderProgram);
+    basicShader->Use();
 
     triangle->Draw();
 }
