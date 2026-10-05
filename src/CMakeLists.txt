@@ -31,6 +31,7 @@ target_link_libraries(jiel_engine
     PRIVATE
         fmt::fmt
         glad_gl_core_41
+        imgui
         SDL3::SDL3
 )
 

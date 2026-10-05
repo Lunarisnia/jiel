@@ -12,6 +12,9 @@
 #include <cstdio>
 #include <fmt/base.h>
 #include <glad/gl.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl3.h>
 #include <string>
 
 Application::Application() = default;
@@ -92,6 +95,13 @@ void Application::Init() {
     createWindow();
     createOpenGLContext();
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL3_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL3_Init("#version 410 core");
+    imguiInitialized = true;
+
     setupDrawTriangle();
 
     prevTick = getTime();
@@ -99,10 +109,17 @@ void Application::Init() {
     while (running) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL3_ProcessEvent(&event);
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
             }
         }
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::ShowDemoWindow();
 
         int width = 0;
         int height = 0;
@@ -112,6 +129,9 @@ void Application::Init() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         drawTriangle();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         fpsCounter(window);
 
@@ -171,6 +191,11 @@ void Application::createOpenGLContext() {
 }
 
 Application::~Application() {
+    if (imguiInitialized) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+    }
     SDL_GL_DestroyContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();

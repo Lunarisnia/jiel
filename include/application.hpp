@@ -8,8 +8,9 @@ struct WindowSize {
 
 class Application {
   private:
-    SDL_Window* window;
-    SDL_GLContext context;
+    SDL_Window* window = nullptr;
+    SDL_GLContext context = nullptr;
+    bool imguiInitialized = false;
 
   public:
     Application();
