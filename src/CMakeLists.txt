@@ -1,6 +1,8 @@
 add_library(jiel_engine
     application.cpp
+    file.cpp
     graphics/graphics.cpp
+    graphics/mesh.cpp
 )
 
 add_library(jiel::engine ALIAS jiel_engine)

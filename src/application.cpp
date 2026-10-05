@@ -1,7 +1,9 @@
 #include "application.hpp"
 #include "SDL3/SDL_timer.h"
 #include "SDL3/SDL_video.h"
+#include "file.hpp"
 #include "fmt/format.h"
+#include "graphics/mesh.hpp"
 #include "math/vec3.hpp"
 
 #include <SDL3/SDL.h>
@@ -22,6 +24,8 @@ GLuint shaderProgram = 0;
 GLuint triangleVAO = 0;
 GLuint triangleEBO = 0;
 GLuint triangleVAO2 = 0;
+
+Mesh* triangle;
 
 bool checkShaderCompilation(GLuint shader, const char* name) {
     GLint compiled = GL_FALSE;
@@ -65,65 +69,26 @@ void setupDrawTriangle() {
       math::Vec3(-0.5f, 0.5f, 0.0f),
       math::Vec3(-0.5f, -0.5f, 0.0f),
       math::Vec3(0.5f, -0.5f, 0.0f),
-
       math::Vec3(0.5f, 0.5f, 0.0f),
-      math::Vec3(-0.5f, 0.5f, 0.0f),
-      math::Vec3(0.5f, -0.5f, 0.0f),
-    };
-    std::array<math::Vec3, 3> points2 = {
-      math::Vec3(0.5f, 0.5f, 0.0f),
-      math::Vec3(1.0f, -0.5f, 0.0f),
-      math::Vec3(0.0f, -0.5f, 0.0f),
     };
     std::array<GLuint, 6> pointIndice1 = {
         0,1,2,
         2,3,0,
     };
     // clang-format on
+    MeshData meshData{};
+    for (const GLuint& i : pointIndice1) {
+        meshData.indice.emplace_back(i);
+    }
+    for (const math::Vec3& vertex : points) {
+        meshData.vertice.emplace_back(vertex);
+    }
+    triangle = new Mesh(meshData);
 
-    GLuint triangleVBO = 0;
-    glGenBuffers(1, &triangleVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(math::Vec3)),
-                 points.data(), GL_STATIC_DRAW);
-
-    glGenBuffers(1, &triangleEBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, pointIndice1.size() * sizeof(pointIndice1[0]),
-                 pointIndice1.data(), GL_STATIC_DRAW);
-
-    GLuint triangleVBO2 = 0;
-    glGenBuffers(1, &triangleVBO2);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO2);
-    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points2.size() * sizeof(math::Vec3)),
-                 points2.data(), GL_STATIC_DRAW);
-
-    triangleVAO = 0;
-    glGenVertexArrays(1, &triangleVAO);
-    glBindVertexArray(triangleVAO);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    triangleVAO2 = 0;
-    glGenVertexArrays(1, &triangleVAO2);
-    glBindVertexArray(triangleVAO2);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO2);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    const char* vertexShader = "#version 410 core\n"
-                               "in vec3 vp;"
-                               "void main() {"
-                               "  gl_Position = vec4( vp, 1.0 );"
-                               "}";
-
-    const char* fragmentShader = "#version 410 core\n"
-                                 "out vec4 frag_colour;"
-                                 "void main() {"
-                                 "  frag_colour = vec4( 0.5, 0.0, 0.5, 1.0 );"
-                                 "}";
+    const std::string vertexShaderSource = File::LoadFile("apps/sandbox/shaders/vertex.vert");
+    const std::string fragmentShaderSource = File::LoadFile("apps/sandbox/shaders/fragment.frag");
+    const char* vertexShader = vertexShaderSource.c_str();
+    const char* fragmentShader = fragmentShaderSource.c_str();
 
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertexShader, NULL);
@@ -159,11 +124,7 @@ void setupDrawTriangle() {
 void drawTriangle() {
     glUseProgram(shaderProgram);
 
-    glBindVertexArray(triangleVAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-    glBindVertexArray(triangleVAO2);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    triangle->Draw();
 }
 
 double getTime() {
