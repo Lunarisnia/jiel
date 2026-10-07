@@ -6,6 +6,8 @@
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
 #include "math/vec3.hpp"
+#include "primitives/plane.hpp"
+#include "time.hpp"
 
 #include <SDL3/SDL.h>
 #include <array>
@@ -30,30 +32,12 @@ GLuint triangleEBO = 0;
 GLuint triangleVAO2 = 0;
 
 Shader* basicShader;
-Mesh* triangle;
+Mesh* plane;
 
 // TODO: implement a mesh loader
 void setupDrawTriangle() {
-    // clang-format off
-    std::array<math::Vec3, 6> points = {
-      math::Vec3(-0.5f, 0.5f, 0.0f),
-      math::Vec3(-0.5f, -0.5f, 0.0f),
-      math::Vec3(0.5f, -0.5f, 0.0f),
-      math::Vec3(0.5f, 0.5f, 0.0f),
-    };
-    std::array<GLuint, 6> pointIndice1 = {
-        0,1,2,
-        2,3,0,
-    };
-    // clang-format on
-    MeshData meshData{};
-    for (const GLuint& i : pointIndice1) {
-        meshData.indice.emplace_back(i);
-    }
-    for (const math::Vec3& vertex : points) {
-        meshData.vertice.emplace_back(vertex);
-    }
-    triangle = new Mesh(meshData);
+    Mesh p = primitive::CreatePlane();
+    plane = &p;
 
     const std::string vertexShaderSource = File::LoadFile("apps/sandbox/shaders/vertex.vert");
     const std::string fragmentShaderSource = File::LoadFile("apps/sandbox/shaders/fragment.frag");
@@ -68,19 +52,14 @@ void setupDrawTriangle() {
 void drawTriangle() {
     basicShader->Use();
 
-    triangle->Draw();
-}
-
-// TODO: move this to a util library
-double getTime() {
-    return static_cast<double>(SDL_GetTicks()) / 1000.0f;
+    plane->Draw();
 }
 
 // TODO: should this be here?
 double prevTick;
 double fpsCooldown = 0.1f;
-void fpsCounter(SDL_Window* window) {
-    double currentTick = getTime();
+void fpsCounter(SDL_Window* window, Time time) {
+    double currentTick = time.GetTime();
 
     double elapsedTick = currentTick - prevTick;
     prevTick = currentTick;
@@ -107,7 +86,8 @@ void Application::Init() {
 
     setupDrawTriangle();
 
-    prevTick = getTime();
+    Time time{};
+    prevTick = time.GetTime();
     bool running = true;
     while (running) {
         SDL_Event event;
@@ -136,7 +116,7 @@ void Application::Init() {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        fpsCounter(window);
+        fpsCounter(window, time);
 
         SDL_GL_SwapWindow(window);
     }

@@ -1,9 +1,12 @@
 add_library(jiel_engine
     application.cpp
     file.cpp
+    time.cpp
     graphics/graphics.cpp
     graphics/mesh.cpp
     graphics/shader.cpp
+    primitives/plane.cpp
+    ${PROJECT_SOURCE_DIR}/include/primitives/plane.hpp
 )
 
 add_library(jiel::engine ALIAS jiel_engine)
