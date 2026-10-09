@@ -1,6 +1,7 @@
-add_library(jiel_engine
+add_library(jiel_engine STATIC
     application.cpp
     file.cpp
+    mesh_loader.cpp
     time.cpp
     graphics/graphics.cpp
     graphics/mesh.cpp
@@ -28,7 +29,7 @@ target_include_directories(jiel_engine
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
-target_link_libraries(jiel_engine PUBLIC jiel::math)
+target_link_libraries(jiel_engine PUBLIC assimp::assimp jiel::math)
 
 target_link_libraries(jiel_engine
     PRIVATE

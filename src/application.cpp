@@ -6,12 +6,14 @@
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
 #include "math/vec3.hpp"
+#include "mesh_loader.hpp"
 #include "primitives/plane.hpp"
 #include "time.hpp"
 
 #include <SDL3/SDL.h>
 #include <array>
 #include <cstdio>
+#include <expected>
 #include <fmt/base.h>
 #include <glad/gl.h>
 #include <imgui.h>
@@ -27,16 +29,19 @@ constexpr WindowSize WINDOW_SIZE = {
     .Height = 720,
 };
 
-GLuint shaderProgram = 0;
-GLuint triangleVAO = 0;
-GLuint triangleEBO = 0;
-GLuint triangleVAO2 = 0;
-
 std::unique_ptr<Shader> basicShader;
 std::unique_ptr<Mesh> plane;
+std::unique_ptr<Mesh> head;
 
-// TODO: implement a mesh loader
 void setupDrawTriangle() {
+    // TODO: find out why does this not properly render in renderdoc
+    std::expected<Mesh, std::string> loadedHead =
+        MeshLoader::LoadOBJ("apps/sandbox/models/obj/african_head/african_head.obj");
+    if (!loadedHead.has_value()) {
+        fmt::println("couldn't load model: ", loadedHead.error());
+        return;
+    }
+    head = std::make_unique<Mesh>(loadedHead.value());
     plane = std::make_unique<Mesh>(primitive::CreatePlane());
 
     const std::string vertexShaderSource = File::LoadFile("apps/sandbox/shaders/vertex.vert");
@@ -52,7 +57,8 @@ void setupDrawTriangle() {
 void drawTriangle() {
     basicShader->Use();
 
-    plane->Draw();
+    // plane->Draw();
+    head->Draw();
 }
 
 // TODO: should this be here?
