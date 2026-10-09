@@ -17,6 +17,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
+#include <memory>
 #include <string>
 
 Application::Application() = default;
@@ -31,18 +32,17 @@ GLuint triangleVAO = 0;
 GLuint triangleEBO = 0;
 GLuint triangleVAO2 = 0;
 
-Shader* basicShader;
-Mesh* plane;
+std::unique_ptr<Shader> basicShader;
+std::unique_ptr<Mesh> plane;
 
 // TODO: implement a mesh loader
 void setupDrawTriangle() {
-    Mesh p = primitive::CreatePlane();
-    plane = &p;
+    plane = std::make_unique<Mesh>(primitive::CreatePlane());
 
     const std::string vertexShaderSource = File::LoadFile("apps/sandbox/shaders/vertex.vert");
     const std::string fragmentShaderSource = File::LoadFile("apps/sandbox/shaders/fragment.frag");
 
-    basicShader = new Shader{};
+    basicShader = std::make_unique<Shader>();
     basicShader->Add(vertexShaderSource, GL_VERTEX_SHADER);
     basicShader->Add(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
