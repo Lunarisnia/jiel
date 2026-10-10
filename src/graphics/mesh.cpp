@@ -3,6 +3,9 @@
 #include "math/vec3.hpp"
 
 Mesh::Mesh(const MeshData& data) {
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, data.vertice.size() * sizeof(math::Vec3), data.vertice.data(),
@@ -14,11 +17,7 @@ Mesh::Mesh(const MeshData& data) {
                  GL_STATIC_DRAW);
     indexCount = data.indice.size();
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 }
 

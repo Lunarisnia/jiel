@@ -1,18 +1,14 @@
 #include "application.hpp"
-#include "SDL3/SDL_timer.h"
 #include "SDL3/SDL_video.h"
 #include "file.hpp"
 #include "fmt/format.h"
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
-#include "math/vec3.hpp"
 #include "mesh_loader.hpp"
 #include "primitives/plane.hpp"
 #include "time.hpp"
 
 #include <SDL3/SDL.h>
-#include <array>
-#include <cstdio>
 #include <expected>
 #include <fmt/base.h>
 #include <glad/gl.h>
