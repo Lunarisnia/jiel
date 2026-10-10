@@ -29,8 +29,8 @@ std::unique_ptr<Shader> basicShader;
 std::unique_ptr<Mesh> plane;
 std::unique_ptr<Mesh> head;
 
+// TODO: make the application extendable to create separate app move the responsibility from here
 void setupDrawTriangle() {
-    // TODO: find out why does this not properly render in renderdoc
     std::expected<Mesh, std::string> loadedHead =
         MeshLoader::LoadOBJ("apps/sandbox/models/obj/african_head/african_head.obj");
     if (!loadedHead.has_value()) {
