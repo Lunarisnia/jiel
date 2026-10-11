@@ -8,7 +8,9 @@ add_library(jiel_engine STATIC
     graphics/mesh.cpp
     graphics/shader.cpp
     primitives/plane.cpp
+    primitives/triangle.cpp
     ${PROJECT_SOURCE_DIR}/include/primitives/plane.hpp
+    ${PROJECT_SOURCE_DIR}/include/primitives/triangle.hpp
 )
 
 add_library(jiel::engine ALIAS jiel_engine)

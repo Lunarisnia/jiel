@@ -19,3 +19,11 @@ build: configure
 .PHONY: run
 run: build
 	./$(BUILD_DIR)/apps/sandbox/jiel$(EXE_SUFFIX)
+
+.PHONY: build-aquarium
+build-aquarium: configure
+	cmake --build ./$(BUILD_DIR) --target aquarium
+
+.PHONY: run-aquarium
+run-aquarium: build-aquarium
+	./$(BUILD_DIR)/apps/aquarium/aquarium$(EXE_SUFFIX)

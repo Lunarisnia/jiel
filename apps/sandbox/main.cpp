@@ -30,8 +30,8 @@ int main() {
     }
 
     Shader shader{};
-    shader.Add(File::LoadFile("apps/sandbox/shaders/vertex.vert"), GL_VERTEX_SHADER);
-    shader.Add(File::LoadFile("apps/sandbox/shaders/fragment.frag"), GL_FRAGMENT_SHADER);
+    shader.Add(File::LoadFile("assets/shaders/common/basic.vert"), GL_VERTEX_SHADER);
+    shader.Add(File::LoadFile("assets/shaders/common/basic.frag"), GL_FRAGMENT_SHADER);
     shader.Compile();
 
     Time time{};
