@@ -1,6 +1,7 @@
 add_library(jiel_engine STATIC
     application.cpp
     file.cpp
+    fps_counter.cpp
     mesh_loader.cpp
     time.cpp
     graphics/graphics.cpp

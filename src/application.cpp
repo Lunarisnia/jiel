@@ -1,133 +1,78 @@
 #include "application.hpp"
-#include "SDL3/SDL_video.h"
-#include "file.hpp"
-#include "fmt/format.h"
-#include "graphics/mesh.hpp"
-#include "graphics/shader.hpp"
-#include "mesh_loader.hpp"
-#include "primitives/plane.hpp"
-#include "time.hpp"
 
 #include <SDL3/SDL.h>
-#include <expected>
 #include <fmt/base.h>
 #include <glad/gl.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
-#include <memory>
-#include <string>
 
-Application::Application() = default;
-
-constexpr WindowSize WINDOW_SIZE = {
-    .Width = 1028,
-    .Height = 720,
-};
-
-std::unique_ptr<Shader> basicShader;
-std::unique_ptr<Mesh> plane;
-std::unique_ptr<Mesh> head;
-
-// TODO: make the application extendable to create separate app move the responsibility from here
-void setupDrawTriangle() {
-    std::expected<Mesh, std::string> loadedHead =
-        MeshLoader::LoadOBJ("apps/sandbox/models/obj/african_head/african_head.obj");
-    if (!loadedHead.has_value()) {
-        fmt::println("couldn't load model: ", loadedHead.error());
+Application::Application(const ApplicationConfig& config) {
+    if (!createWindow(config) || !createOpenGLContext()) {
         return;
     }
-    head = std::make_unique<Mesh>(loadedHead.value());
-    plane = std::make_unique<Mesh>(primitive::CreatePlane());
-
-    const std::string vertexShaderSource = File::LoadFile("apps/sandbox/shaders/vertex.vert");
-    const std::string fragmentShaderSource = File::LoadFile("apps/sandbox/shaders/fragment.frag");
-
-    basicShader = std::make_unique<Shader>();
-    basicShader->Add(vertexShaderSource, GL_VERTEX_SHADER);
-    basicShader->Add(fragmentShaderSource, GL_FRAGMENT_SHADER);
-
-    basicShader->Compile();
-}
-
-void drawTriangle() {
-    basicShader->Use();
-
-    // plane->Draw();
-    head->Draw();
-}
-
-// TODO: should this be here?
-double prevTick;
-double fpsCooldown = 0.1f;
-void fpsCounter(SDL_Window* window, Time time) {
-    double currentTick = time.GetTime();
-
-    double elapsedTick = currentTick - prevTick;
-    prevTick = currentTick;
-
-    fpsCooldown -= elapsedTick;
-    if (fpsCooldown < 0.0f && elapsedTick > 0.0f) {
-        double fps = 1.0f / elapsedTick;
-
-        SDL_SetWindowTitle(window, fmt::format("FPS: {}", fps).c_str());
-        fpsCooldown = 0.1f;
-    }
-}
-
-void Application::Init() {
-    createWindow();
-    createOpenGLContext();
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplSDL3_InitForOpenGL(window, context);
-    ImGui_ImplOpenGL3_Init("#version 410 core");
-    imguiInitialized = true;
 
-    setupDrawTriangle();
-
-    Time time{};
-    prevTick = time.GetTime();
-    bool running = true;
-    while (running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT) {
-                running = false;
-            }
-        }
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::ShowDemoWindow();
-
-        int width = 0;
-        int height = 0;
-        SDL_GetWindowSizeInPixels(window, &width, &height);
-        glViewport(0, 0, width, height);
-        glClearColor(0.075f, 0.075F, 0.11F, 1.0F);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        drawTriangle();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        fpsCounter(window, time);
-
-        SDL_GL_SwapWindow(window);
+    if (!ImGui_ImplSDL3_InitForOpenGL(window, context)) {
+        fmt::println(stderr, "Could not initialize ImGui SDL backend");
+        ImGui::DestroyContext();
+        return;
     }
+
+    if (!ImGui_ImplOpenGL3_Init("#version 410 core")) {
+        fmt::println(stderr, "Could not initialize ImGui OpenGL backend");
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+        return;
+    }
+
+    imguiInitialized = true;
+    initialized = true;
 }
 
-void Application::createWindow() {
+bool Application::IsValid() const {
+    return initialized;
+}
+
+SDL_Window* Application::GetWindow() const {
+    return window;
+}
+
+bool Application::PollEvent(SDL_Event& event) {
+    if (!SDL_PollEvent(&event)) {
+        return false;
+    }
+
+    ImGui_ImplSDL3_ProcessEvent(&event);
+    return true;
+}
+
+void Application::BeginFrame() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    int width = 0;
+    int height = 0;
+    SDL_GetWindowSizeInPixels(window, &width, &height);
+    glViewport(0, 0, width, height);
+    glClearColor(0.075F, 0.075F, 0.11F, 1.0F);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Application::EndFrame() {
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(window);
+}
+
+bool Application::createWindow(const ApplicationConfig& config) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        fmt::println("Failed to initialize video: {}", SDL_GetError());
-        return;
+        fmt::println(stderr, "Failed to initialize video: {}", SDL_GetError());
+        return false;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -135,44 +80,41 @@ void Application::createWindow() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    int context_flags = 0;
+    int contextFlags = 0;
 #ifdef __APPLE__
-    context_flags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
+    contextFlags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 #endif
 #ifndef NDEBUG
-    context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+    contextFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
 #endif
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, context_flags);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, contextFlags);
 
-    window =
-        SDL_CreateWindow("jiel", WINDOW_SIZE.Width, WINDOW_SIZE.Height,
-                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    window = SDL_CreateWindow(config.title.c_str(), config.width, config.height,
+                              SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
+                                  SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (window == nullptr) {
-        fmt::println("Could not create a window: {}", SDL_GetError());
-        SDL_Quit();
-        return;
+        fmt::println(stderr, "Could not create a window: {}", SDL_GetError());
+        return false;
     }
+
+    return true;
 }
 
-void Application::createOpenGLContext() {
+bool Application::createOpenGLContext() {
     context = SDL_GL_CreateContext(window);
     if (context == nullptr) {
-        fmt::println("Could not create an OpenGL context: {}", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
+        fmt::println(stderr, "Could not create an OpenGL context: {}", SDL_GetError());
+        return false;
     }
 
     if (gladLoadGL(SDL_GL_GetProcAddress) == 0) {
-        fmt::println("Could not load OpenGL: {}", SDL_GetError());
-        SDL_GL_DestroyContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
+        fmt::println(stderr, "Could not load OpenGL: {}", SDL_GetError());
+        return false;
     }
 
     SDL_GL_SetSwapInterval(1);
-    fmt::print("OpenGL {}\n", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    fmt::println("OpenGL {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    return true;
 }
 
 Application::~Application() {
@@ -181,7 +123,11 @@ Application::~Application() {
         ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext();
     }
-    SDL_GL_DestroyContext(context);
-    SDL_DestroyWindow(window);
+    if (context != nullptr) {
+        SDL_GL_DestroyContext(context);
+    }
+    if (window != nullptr) {
+        SDL_DestroyWindow(window);
+    }
     SDL_Quit();
 }
