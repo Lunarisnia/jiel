@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glad/gl.h"
+#include "math/vec3.hpp"
 #include <string>
 #include <vector>
 class Shader {
@@ -17,6 +18,7 @@ class Shader {
     void Use();
 
     void SetFloatUniform(const std::string& name, float value) const;
+    void SetVec3Uniform(const std::string& name, const math::Vec3& value) const;
 
   private:
     bool checkShaderCompilation(GLuint shader, GLint type);

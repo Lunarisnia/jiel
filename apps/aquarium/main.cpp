@@ -7,6 +7,7 @@
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
+#include "math/vec3.hpp"
 #include "primitives/triangle.hpp"
 #include "time.hpp"
 #include <memory>
@@ -27,6 +28,7 @@ int main() {
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.frag"), GL_FRAGMENT_SHADER);
     shader->Compile();
+    shader->SetVec3Uniform("position", math::Vec3{0.0F, 0.0F, 0.0F});
 
     auto material = std::make_shared<Material>(shader);
     auto triangle = std::make_shared<Mesh>(primitive::CreateTriangle());

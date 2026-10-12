@@ -45,6 +45,13 @@ void Shader::SetFloatUniform(const std::string& name, float value) const {
     }
 }
 
+void Shader::SetVec3Uniform(const std::string& name, const math::Vec3& value) const {
+    const GLint location = glGetUniformLocation(program, name.c_str());
+    if (location != -1) {
+        glProgramUniform3f(program, location, value.x(), value.y(), value.z());
+    }
+}
+
 bool Shader::checkShaderCompilation(GLuint shader, GLint shaderType) {
     GLint compiled = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
