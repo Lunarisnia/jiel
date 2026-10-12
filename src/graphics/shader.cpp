@@ -38,6 +38,13 @@ void Shader::Use() {
     glUseProgram(program);
 }
 
+void Shader::SetFloatUniform(const std::string& name, float value) const {
+    const GLint location = glGetUniformLocation(program, name.c_str());
+    if (location != -1) {
+        glProgramUniform1f(program, location, value);
+    }
+}
+
 bool Shader::checkShaderCompilation(GLuint shader, GLint shaderType) {
     GLint compiled = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);

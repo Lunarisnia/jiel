@@ -8,6 +8,7 @@
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
 #include "primitives/triangle.hpp"
+#include "time.hpp"
 #include <memory>
 
 int main() {
@@ -23,8 +24,8 @@ int main() {
     }
 
     auto shader = std::make_shared<Shader>();
-    shader->Add(File::LoadFile("assets/shaders/common/basic.vert"), GL_VERTEX_SHADER);
-    shader->Add(File::LoadFile("assets/shaders/common/basic.frag"), GL_FRAGMENT_SHADER);
+    shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
+    shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.frag"), GL_FRAGMENT_SHADER);
     shader->Compile();
 
     auto material = std::make_shared<Material>(shader);
@@ -34,6 +35,7 @@ int main() {
     GameObject fish{};
     fish.AddComponent(meshRenderer);
 
+    Time time{};
     bool running = true;
     while (running) {
         SDL_Event event;
@@ -44,6 +46,7 @@ int main() {
         }
 
         app.BeginFrame();
+        shader->SetFloatUniform("time", static_cast<float>(time.GetTime()));
         fish.Update();
 
         app.EndFrame();

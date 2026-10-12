@@ -16,6 +16,8 @@ class Shader {
     void Compile();
     void Use();
 
+    void SetFloatUniform(const std::string& name, float value) const;
+
   private:
     bool checkShaderCompilation(GLuint shader, GLint type);
     bool checkProgramLink(GLuint program);
