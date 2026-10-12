@@ -68,6 +68,21 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(fmt SDL3 glad imgui assimp)
 
+# Assimp's MinGW static target exports two competing ways to link libstdc++,
+# which produces duplicate RTTI definitions in C++23 executables.
+if(MINGW)
+    get_target_property(assimp_link_libraries assimp INTERFACE_LINK_LIBRARIES)
+    list(REMOVE_ITEM assimp_link_libraries
+        -static-libgcc
+        -static-libstdc++
+        -Wl,-Bstatic
+        -lstdc++
+    )
+    set_target_properties(assimp PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${assimp_link_libraries}"
+    )
+endif()
+
 # OpenGL 4.1 core is the highest core profile shared by Windows and macOS.
 glad_add_library(glad_gl_core_41 STATIC REPRODUCIBLE API gl:core=4.1)
 

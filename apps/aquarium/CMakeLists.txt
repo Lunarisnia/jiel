@@ -1,4 +1,18 @@
-add_executable(aquarium main.cpp)
+add_executable(aquarium
+    main.cpp
+    src/game_object.cpp
+    src/ecs/component.cpp
+    src/ecs/mesh_renderer.cpp
+    include/game_object.hpp
+    include/ecs/component.hpp
+    include/ecs/mesh_renderer.hpp
+    include/ecs/transform.hpp
+)
+
+target_include_directories(aquarium
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 target_link_libraries(aquarium
     PRIVATE

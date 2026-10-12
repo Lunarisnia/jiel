@@ -5,6 +5,7 @@ add_library(jiel_engine STATIC
     mesh_loader.cpp
     time.cpp
     graphics/graphics.cpp
+    graphics/material.cpp
     graphics/mesh.cpp
     graphics/shader.cpp
     primitives/plane.cpp

@@ -1,10 +1,14 @@
 #include "SDL3/SDL_events.h"
 #include "application.hpp"
+#include "ecs/mesh_renderer.hpp"
 #include "file.hpp"
 #include "fmt/base.h"
+#include "game_object.hpp"
+#include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
 #include "primitives/triangle.hpp"
+#include <memory>
 
 int main() {
     ApplicationConfig appConfig{
@@ -18,12 +22,17 @@ int main() {
         return 1;
     }
 
-    Shader shader{};
-    shader.Add(File::LoadFile("assets/shaders/common/basic.vert"), GL_VERTEX_SHADER);
-    shader.Add(File::LoadFile("assets/shaders/common/basic.frag"), GL_FRAGMENT_SHADER);
-    shader.Compile();
+    auto shader = std::make_shared<Shader>();
+    shader->Add(File::LoadFile("assets/shaders/common/basic.vert"), GL_VERTEX_SHADER);
+    shader->Add(File::LoadFile("assets/shaders/common/basic.frag"), GL_FRAGMENT_SHADER);
+    shader->Compile();
 
-    Mesh triangle = primitive::CreateTriangle();
+    auto material = std::make_shared<Material>(shader);
+    auto triangle = std::make_shared<Mesh>(primitive::CreateTriangle());
+    auto meshRenderer = std::make_shared<MeshRenderer>(triangle, material);
+
+    GameObject fish{};
+    fish.AddComponent(meshRenderer);
 
     bool running = true;
     while (running) {
@@ -35,8 +44,7 @@ int main() {
         }
 
         app.BeginFrame();
-        shader.Use();
-        triangle.Draw();
+        fish.Update();
 
         app.EndFrame();
     }
