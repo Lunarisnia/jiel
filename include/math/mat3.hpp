@@ -83,12 +83,12 @@ public:
     constexpr Vec3 operator*(const Vec3& vector) const
     {
         return Vec3{
-            (*this)(0, 0) * vector.x() + (*this)(0, 1) * vector.y() +
-                (*this)(0, 2) * vector.z(),
-            (*this)(1, 0) * vector.x() + (*this)(1, 1) * vector.y() +
-                (*this)(1, 2) * vector.z(),
-            (*this)(2, 0) * vector.x() + (*this)(2, 1) * vector.y() +
-                (*this)(2, 2) * vector.z(),
+            (*this)(0, 0) * vector.x + (*this)(0, 1) * vector.y +
+                (*this)(0, 2) * vector.z,
+            (*this)(1, 0) * vector.x + (*this)(1, 1) * vector.y +
+                (*this)(1, 2) * vector.z,
+            (*this)(2, 0) * vector.x + (*this)(2, 1) * vector.y +
+                (*this)(2, 2) * vector.z,
         };
     }
 

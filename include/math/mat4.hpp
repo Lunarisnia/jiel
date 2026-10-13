@@ -34,6 +34,9 @@ public:
 
     constexpr explicit Mat4(std::array<float, 16> values) : m_(values) {}
 
+    constexpr const float* Data() const { return m_.data(); }
+    constexpr float* Data() { return m_.data(); }
+
     constexpr float& operator()(std::size_t row, std::size_t column)
     {
         assert(row < 4 && column < 4);
@@ -89,14 +92,14 @@ public:
     constexpr Vec4 operator*(const Vec4& vector) const
     {
         return Vec4{
-            (*this)(0, 0) * vector.x() + (*this)(0, 1) * vector.y() +
-                (*this)(0, 2) * vector.z() + (*this)(0, 3) * vector.w(),
-            (*this)(1, 0) * vector.x() + (*this)(1, 1) * vector.y() +
-                (*this)(1, 2) * vector.z() + (*this)(1, 3) * vector.w(),
-            (*this)(2, 0) * vector.x() + (*this)(2, 1) * vector.y() +
-                (*this)(2, 2) * vector.z() + (*this)(2, 3) * vector.w(),
-            (*this)(3, 0) * vector.x() + (*this)(3, 1) * vector.y() +
-                (*this)(3, 2) * vector.z() + (*this)(3, 3) * vector.w(),
+            (*this)(0, 0) * vector.x + (*this)(0, 1) * vector.y +
+                (*this)(0, 2) * vector.z + (*this)(0, 3) * vector.w,
+            (*this)(1, 0) * vector.x + (*this)(1, 1) * vector.y +
+                (*this)(1, 2) * vector.z + (*this)(1, 3) * vector.w,
+            (*this)(2, 0) * vector.x + (*this)(2, 1) * vector.y +
+                (*this)(2, 2) * vector.z + (*this)(2, 3) * vector.w,
+            (*this)(3, 0) * vector.x + (*this)(3, 1) * vector.y +
+                (*this)(3, 2) * vector.z + (*this)(3, 3) * vector.w,
         };
     }
 

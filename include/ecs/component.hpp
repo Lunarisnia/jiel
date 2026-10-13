@@ -2,9 +2,12 @@
 
 #include <string>
 
+class GameObject;
+
 class Component {
   public:
     const std::string id;
+    GameObject* gameObject = nullptr;
 
     explicit Component(std::string id);
     virtual ~Component() = default;

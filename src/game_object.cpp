@@ -1,4 +1,9 @@
 #include "game_object.hpp"
+#include "ecs/component.hpp"
+
+GameObject::GameObject() : transform(std::make_shared<TransformComponent>()) {
+    AddComponent(transform);
+}
 
 void GameObject::Init() {
     for (auto c : components) {
@@ -19,5 +24,6 @@ void GameObject::AddComponent(std::shared_ptr<Component> newComponent) {
         }
     }
 
+    newComponent->gameObject = this;
     components.emplace_back(newComponent);
 }

@@ -1,6 +1,8 @@
 #include "SDL3/SDL_events.h"
 #include "application.hpp"
-#include "ecs/mesh_renderer.hpp"
+#include "debug_inspector.hpp"
+#include "ecs/fish_component.hpp"
+#include "ecs/mesh_renderer_component.hpp"
 #include "file.hpp"
 #include "fmt/base.h"
 #include "game_object.hpp"
@@ -28,14 +30,15 @@ int main() {
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.frag"), GL_FRAGMENT_SHADER);
     shader->Compile();
-    shader->SetVec3Uniform("position", math::Vec3{0.0F, 0.0F, 0.0F});
 
     auto material = std::make_shared<Material>(shader);
     auto triangle = std::make_shared<Mesh>(primitive::CreateTriangle());
-    auto meshRenderer = std::make_shared<MeshRenderer>(triangle, material);
+    auto meshRenderer = std::make_shared<MeshRendererComponent>(triangle, material);
+    auto fishComponent = std::make_shared<FishComponent>();
 
     GameObject fish{};
     fish.AddComponent(meshRenderer);
+    fish.AddComponent(fishComponent);
 
     Time time{};
     bool running = true;
@@ -48,6 +51,9 @@ int main() {
         }
 
         app.BeginFrame();
+        DebugInspector::Draw(fish);
+
+        shader->SetMat4Uniform("model", fish.transform->Model());
         shader->SetFloatUniform("time", static_cast<float>(time.GetTime()));
         fish.Update();
 

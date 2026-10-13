@@ -1,12 +1,8 @@
 #version 410 core
 layout(location = 0) in vec3 vertexPosition;
 
-uniform float time;
-uniform vec3 position;
+uniform mat4 model;
 
 void main() {
-    vec3 pos = (vertexPosition + position);
-    pos.x += sin(time) * pos.x * 0.5f;
-    pos.y += cos(time) * pos.y * 0.5f;
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = model * vec4(vertexPosition, 1.0);
 }

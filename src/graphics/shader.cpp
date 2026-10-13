@@ -45,10 +45,17 @@ void Shader::SetFloatUniform(const std::string& name, float value) const {
     }
 }
 
+void Shader::SetMat4Uniform(const std::string& name, const math::Mat4& value) const {
+    const GLint location = glGetUniformLocation(program, name.c_str());
+    if (location != -1) {
+        glProgramUniformMatrix4fv(program, location, 1, GL_TRUE, value.Data());
+    }
+}
+
 void Shader::SetVec3Uniform(const std::string& name, const math::Vec3& value) const {
     const GLint location = glGetUniformLocation(program, name.c_str());
     if (location != -1) {
-        glProgramUniform3f(program, location, value.x(), value.y(), value.z());
+        glProgramUniform3f(program, location, value.x, value.y, value.z);
     }
 }
 

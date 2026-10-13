@@ -1,12 +1,9 @@
 add_executable(aquarium
     main.cpp
-    src/game_object.cpp
-    src/ecs/component.cpp
-    src/ecs/mesh_renderer.cpp
-    include/game_object.hpp
-    include/ecs/component.hpp
-    include/ecs/mesh_renderer.hpp
-    include/ecs/transform.hpp
+    src/debug_inspector.cpp
+    src/ecs/fish_component.cpp
+    include/debug_inspector.hpp
+    include/ecs/fish_component.hpp
 )
 
 target_include_directories(aquarium
