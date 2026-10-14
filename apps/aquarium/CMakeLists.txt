@@ -1,9 +1,15 @@
 add_executable(aquarium
     main.cpp
     src/debug_inspector.cpp
+    src/world.cpp
     src/ecs/fish_component.cpp
+    src/ecs/food_component.cpp
+    src/ecs/triggerbox_component.cpp
     include/debug_inspector.hpp
+    include/world.hpp
     include/ecs/fish_component.hpp
+    include/ecs/food_component.hpp
+    include/ecs/triggerbox_component.hpp
 )
 
 target_include_directories(aquarium

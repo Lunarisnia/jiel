@@ -4,5 +4,5 @@ class GameObject;
 
 class DebugInspector {
   public:
-    static void Draw(GameObject& object);
+    static void Draw(GameObject* object);
 };

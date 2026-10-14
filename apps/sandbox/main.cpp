@@ -34,7 +34,6 @@ int main() {
     shader.Add(File::LoadFile("assets/shaders/common/basic.frag"), GL_FRAGMENT_SHADER);
     shader.Compile();
 
-    Time time{};
     FpsCounter fpsCounter{};
     bool running = true;
 
@@ -52,7 +51,7 @@ int main() {
         head->Draw();
         ImGui::ShowDemoWindow();
 
-        fpsCounter.Update(time.GetTime());
+        fpsCounter.Update(Time::GetTime());
         if (fpsCounter.WasUpdated()) {
             SDL_SetWindowTitle(
                 app.GetWindow(), fmt::format("FPS: {:.1f}", fpsCounter.GetFps()).c_str());

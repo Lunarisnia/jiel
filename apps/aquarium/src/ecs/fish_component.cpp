@@ -1,14 +1,15 @@
 #include "ecs/fish_component.hpp"
-#include "ecs/transform_component.hpp"
+#include "ecs/mesh_renderer_component.hpp"
 #include "game_object.hpp"
-#include <cmath>
-#include <memory>
+#include "time.hpp"
 
 FishComponent::FishComponent() : Component("FishComponent") {}
 
-void FishComponent::Init() {}
+void FishComponent::Init() {
+    gameObject->transform->scale *= 0.3f;
+    meshRenderer = gameObject->GetComponent<MeshRendererComponent>();
+}
 
 void FishComponent::Update() {
-    std::shared_ptr<TransformComponent> transform = gameObject->GetComponent<TransformComponent>();
-    transform->position.x = std::sin(time.GetTime());
+    meshRenderer->material->shader->SetFloatUniform("time", static_cast<float>(Time::GetTime()));
 }

@@ -2,6 +2,7 @@
 #include "application.hpp"
 #include "debug_inspector.hpp"
 #include "ecs/fish_component.hpp"
+#include "ecs/food_component.hpp"
 #include "ecs/mesh_renderer_component.hpp"
 #include "file.hpp"
 #include "fmt/base.h"
@@ -10,8 +11,9 @@
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
 #include "math/vec3.hpp"
+#include "primitives/plane.hpp"
 #include "primitives/triangle.hpp"
-#include "time.hpp"
+#include "world.hpp"
 #include <memory>
 
 int main() {
@@ -26,6 +28,8 @@ int main() {
         return 1;
     }
 
+    World world{};
+
     auto shader = std::make_shared<Shader>();
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.frag"), GL_FRAGMENT_SHADER);
@@ -36,11 +40,30 @@ int main() {
     auto meshRenderer = std::make_shared<MeshRendererComponent>(triangle, material);
     auto fishComponent = std::make_shared<FishComponent>();
 
-    GameObject fish{};
-    fish.AddComponent(meshRenderer);
-    fish.AddComponent(fishComponent);
+    auto fish = std::make_shared<GameObject>();
+    fish->AddComponent(meshRenderer);
+    fish->AddComponent(fishComponent);
+    world.AddGameObject(fish);
 
-    Time time{};
+    // TODO: handle draw order because zcoord does not seem to work?
+    // TODO: do the trigger box
+    auto foodShader = std::make_shared<Shader>();
+    foodShader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
+    foodShader->Add(File::LoadFile("assets/shaders/common/solid.frag"), GL_FRAGMENT_SHADER);
+    foodShader->Compile();
+    foodShader->SetVec3Uniform("color", math::Vec3{1.0F, 1.0F, 0.0F});
+    auto foodMeshMaterial = std::make_shared<Material>(foodShader);
+    auto foodMesh = std::make_shared<Mesh>(primitive::CreatePlane());
+    auto foodMeshRenderer = std::make_shared<MeshRendererComponent>(foodMesh, foodMeshMaterial);
+    auto foodComponent = std::make_shared<FoodComponent>();
+
+    auto food = std::make_shared<GameObject>();
+    food->transform->position.z = -1.0f;
+    food->AddComponent(foodMeshRenderer);
+    food->AddComponent(foodComponent);
+    world.AddGameObject(food);
+
+    world.Init();
     bool running = true;
     while (running) {
         SDL_Event event;
@@ -51,11 +74,9 @@ int main() {
         }
 
         app.BeginFrame();
-        DebugInspector::Draw(fish);
+        DebugInspector::Draw(fish.get());
 
-        shader->SetMat4Uniform("model", fish.transform->Model());
-        shader->SetFloatUniform("time", static_cast<float>(time.GetTime()));
-        fish.Update();
+        world.Update();
 
         app.EndFrame();
     }

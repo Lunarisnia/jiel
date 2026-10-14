@@ -31,6 +31,14 @@ public:
 
     constexpr Vec3 operator-() const { return Vec3{-x, -y, -z}; }
 
+    constexpr Vec3& operator*=(float scalar)
+    {
+        x *= scalar;
+        y *= scalar;
+        z *= scalar;
+        return *this;
+    }
+
     constexpr Vec3 operator/(float scalar) const
     {
         assert(scalar != 0.0F);

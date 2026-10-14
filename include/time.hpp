@@ -2,7 +2,7 @@
 
 class Time {
   public:
-    Time() = default;
+    Time() = delete;
 
-    double GetTime();
+    [[nodiscard]] static double GetTime();
 };

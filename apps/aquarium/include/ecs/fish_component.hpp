@@ -1,11 +1,14 @@
 #pragma once
 
 #include "ecs/component.hpp"
-#include "time.hpp"
+
+#include <memory>
+
+class MeshRendererComponent;
 
 class FishComponent : public Component {
   private:
-    Time time;
+    std::shared_ptr<MeshRendererComponent> meshRenderer;
 
   public:
     FishComponent();

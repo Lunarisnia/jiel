@@ -7,6 +7,7 @@ add_library(jiel_engine STATIC
     time.cpp
     ecs/component.cpp
     ecs/mesh_renderer_component.cpp
+    ecs/transform_component.cpp
     graphics/graphics.cpp
     graphics/material.cpp
     graphics/mesh.cpp
