@@ -58,7 +58,7 @@ int main() {
     auto foodComponent = std::make_shared<FoodComponent>();
 
     auto food = std::make_shared<GameObject>();
-    food->transform->position.z = -1.0f;
+    food->transform->position.z = 0.0f;
     food->AddComponent(foodMeshRenderer);
     food->AddComponent(foodComponent);
     world.AddGameObject(food);

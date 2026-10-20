@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "SDL3/SDL_video.h"
 
 #include <SDL3/SDL.h>
 #include <fmt/base.h>
@@ -60,7 +61,7 @@ void Application::BeginFrame() {
     SDL_GetWindowSizeInPixels(window, &width, &height);
     glViewport(0, 0, width, height);
     glClearColor(0.075F, 0.075F, 0.11F, 1.0F);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Application::EndFrame() {
@@ -88,10 +89,11 @@ bool Application::createWindow(const ApplicationConfig& config) {
     contextFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
 #endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, contextFlags);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    window = SDL_CreateWindow(config.title.c_str(), config.width, config.height,
-                              SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
-                                  SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    window =
+        SDL_CreateWindow(config.title.c_str(), config.width, config.height,
+                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (window == nullptr) {
         fmt::println(stderr, "Could not create a window: {}", SDL_GetError());
         return false;
@@ -111,6 +113,9 @@ bool Application::createOpenGLContext() {
         fmt::println(stderr, "Could not load OpenGL: {}", SDL_GetError());
         return false;
     }
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     SDL_GL_SetSwapInterval(1);
     fmt::println("OpenGL {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
