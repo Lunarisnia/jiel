@@ -1,22 +1,21 @@
 #include "primitives/triangle.hpp"
-#include "glad/gl.h"
 #include "graphics/mesh.hpp"
-#include "math/vec3.hpp"
 #include <array>
+#include <cstdint>
 namespace primitive {
 Mesh CreateTriangle() {
     MeshData meshData{};
-    std::array<math::Vec3, 3> vertice = {
-        math::Vec3(-0.5, -0.5, -0.5),
-        math::Vec3(0.0, 0.5, 0.0),
-        math::Vec3(0.5, -0.5, -0.5),
+    std::array<MeshVertex, 3> vertices = {
+        MeshVertex{{-0.5F, -0.5F, -0.5F}},
+        MeshVertex{{0.0F, 0.5F, 0.0F}},
+        MeshVertex{{0.5F, -0.5F, -0.5F}},
     };
-    std::array<GLuint, 3> indice = {0, 1, 2};
-    for (const auto v : vertice) {
-        meshData.vertice.emplace_back(v);
+    std::array<std::uint32_t, 3> indices = {0, 1, 2};
+    for (const auto& vertex : vertices) {
+        meshData.vertices.emplace_back(vertex);
     }
-    for (const auto i : indice) {
-        meshData.indice.emplace_back(i);
+    for (const auto index : indices) {
+        meshData.indices.emplace_back(index);
     }
 
     return Mesh{meshData};

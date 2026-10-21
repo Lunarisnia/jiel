@@ -29,10 +29,16 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    Shader shader{};
-    shader.Add(File::LoadFile("assets/shaders/common/basic.vert"), GL_VERTEX_SHADER);
-    shader.Add(File::LoadFile("assets/shaders/common/basic.frag"), GL_FRAGMENT_SHADER);
-    shader.Compile();
+    Shader shader;
+    auto vertexResult = shader.Add(File::LoadFile("assets/shaders/common/basic.vert"),
+                                   GL_VERTEX_SHADER);
+    auto fragmentResult = vertexResult ? shader.Add(File::LoadFile("assets/shaders/common/basic.frag"),
+                                                    GL_FRAGMENT_SHADER) : vertexResult;
+    auto linkResult = fragmentResult ? shader.Compile() : fragmentResult;
+    if (!linkResult) {
+        fmt::println(stderr, "Could not create shader: {}", linkResult.error());
+        return EXIT_FAILURE;
+    }
 
     FpsCounter fpsCounter{};
     bool running = true;

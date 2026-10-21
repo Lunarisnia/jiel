@@ -1,30 +1,30 @@
 #include "primitives/plane.hpp"
-#include "glad/gl.h"
 #include "graphics/mesh.hpp"
 #include "math/vec3.hpp"
 #include <array>
+#include <cstdint>
 
 namespace primitive {
 Mesh CreatePlane() {
     // clang-format off
-    std::array<math::Vec3, 6> points = {
-        math::Vec3(-0.5f, 0.5f, 0.0f),
-        math::Vec3(-0.5f, -0.5f, 0.0f),
-        math::Vec3(0.5f, -0.5f, 0.0f),
-        math::Vec3(0.5f, 0.5f, 0.0f),
+    std::array<MeshVertex, 4> points = {
+        MeshVertex{{-0.5f, 0.5f, 0.0f}},
+        MeshVertex{{-0.5f, -0.5f, 0.0f}},
+        MeshVertex{{0.5f, -0.5f, 0.0f}},
+        MeshVertex{{0.5f, 0.5f, 0.0f}},
     };
-    std::array<GLuint, 6> indice = {
+    std::array<std::uint32_t, 6> indices = {
         0, 1, 2,
         2, 3, 0,
     };
     // clang-format on
 
     MeshData meshData{};
-    for (const GLuint& i : indice) {
-        meshData.indice.emplace_back(i);
+    for (const std::uint32_t index : indices) {
+        meshData.indices.emplace_back(index);
     }
-    for (const math::Vec3& vertex : points) {
-        meshData.vertice.emplace_back(vertex);
+    for (const MeshVertex& vertex : points) {
+        meshData.vertices.emplace_back(vertex);
     }
     Mesh mesh{meshData};
 

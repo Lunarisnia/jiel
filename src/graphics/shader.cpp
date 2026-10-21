@@ -1,40 +1,102 @@
 #include "graphics/shader.hpp"
-#include "fmt/base.h"
-#include "glad/gl.h"
 
-Shader::Shader() {
-    program = glCreateProgram();
-}
+#include <glad/gl.h>
 
-void Shader::Add(std::string source, GLint shaderType) {
-    GLuint shader = glCreateShader(shaderType);
-    const char* shaderSource = source.c_str();
-    glShaderSource(shader, 1, &shaderSource, NULL);
-    glCompileShader(shader);
-    if (!checkShaderCompilation(shader, shaderType)) {
-        glDeleteShader(shader);
-        return;
+#include <string>
+#include <utility>
+
+Shader::Shader() : program(glCreateProgram()) {}
+
+Shader::~Shader() {
+    for (const auto stage : shaders) {
+        glDeleteShader(stage);
     }
-
-    shaders.emplace_back(shader);
-}
-
-void Shader::Compile() {
-    for (const GLuint& s : shaders) {
-        glAttachShader(program, s);
-    }
-    glLinkProgram(program);
-
-    for (const GLuint& s : shaders) {
-        glDeleteShader(s);
-    }
-
-    if (!checkProgramLink(program)) {
+    if (program != 0) {
         glDeleteProgram(program);
     }
 }
 
-void Shader::Use() {
+Shader::Shader(Shader&& other) noexcept
+    : program(std::exchange(other.program, 0)), shaders(std::move(other.shaders)) {
+    other.shaders.clear();
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept {
+    if (this == &other) {
+        return *this;
+    }
+    for (const auto stage : shaders) {
+        glDeleteShader(stage);
+    }
+    if (program != 0) {
+        glDeleteProgram(program);
+    }
+    program = std::exchange(other.program, 0);
+    shaders = std::move(other.shaders);
+    other.shaders.clear();
+    return *this;
+}
+
+std::expected<void, std::string> Shader::Add(const std::string& source,
+                                             unsigned int shaderType) {
+    const GLuint stage = glCreateShader(shaderType);
+    if (stage == 0) {
+        return std::unexpected("Could not create shader stage");
+    }
+    const char* data = source.c_str();
+    glShaderSource(stage, 1, &data, nullptr);
+    glCompileShader(stage);
+
+    GLint compiled = GL_FALSE;
+    glGetShaderiv(stage, GL_COMPILE_STATUS, &compiled);
+    if (compiled != GL_TRUE) {
+        GLint logLength = 0;
+        glGetShaderiv(stage, GL_INFO_LOG_LENGTH, &logLength);
+        std::string log(static_cast<std::size_t>(logLength), '\0');
+        GLsizei written = 0;
+        glGetShaderInfoLog(stage, logLength, &written, log.data());
+        log.resize(static_cast<std::size_t>(written));
+        glDeleteShader(stage);
+        return std::unexpected("Shader stage compilation failed:\n" + log);
+    }
+
+    shaders.push_back(stage);
+    return {};
+}
+
+std::expected<void, std::string> Shader::Compile() {
+    if (shaders.empty()) {
+        return std::unexpected("No shader stages to link");
+    }
+    if (program == 0) {
+        return std::unexpected("Could not create shader program");
+    }
+    for (const auto stage : shaders) {
+        glAttachShader(program, stage);
+    }
+    glLinkProgram(program);
+    for (const auto stage : shaders) {
+        glDetachShader(program, stage);
+        glDeleteShader(stage);
+    }
+    shaders.clear();
+
+    GLint linked = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked == GL_TRUE) {
+        return {};
+    }
+
+    GLint logLength = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+    std::string log(static_cast<std::size_t>(logLength), '\0');
+    GLsizei written = 0;
+    glGetProgramInfoLog(program, logLength, &written, log.data());
+    log.resize(static_cast<std::size_t>(written));
+    return std::unexpected("Shader program link failed:\n" + log);
+}
+
+void Shader::Use() const {
     glUseProgram(program);
 }
 
@@ -57,48 +119,4 @@ void Shader::SetVec3Uniform(const std::string& name, const math::Vec3& value) co
     if (location != -1) {
         glProgramUniform3f(program, location, value.x, value.y, value.z);
     }
-}
-
-bool Shader::checkShaderCompilation(GLuint shader, GLint shaderType) {
-    GLint compiled = GL_FALSE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled == GL_TRUE) {
-        return true;
-    }
-
-    GLint logLength = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-
-    std::string log(static_cast<std::size_t>(logLength), '\0');
-    GLsizei written = 0;
-    glGetShaderInfoLog(shader, logLength, &written, log.data());
-    log.resize(static_cast<std::size_t>(written));
-
-    std::string shaderName = "";
-    if (shaderType == GL_FRAGMENT_SHADER) {
-        shaderName = "Fragment";
-    } else {
-        shaderName = "Vertex";
-    }
-
-    fmt::println(stderr, "{} shader compilation failed:\n{}", shaderName, log);
-    return false;
-}
-
-bool Shader::checkProgramLink(GLuint program) {
-    GLint linked = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    if (linked == GL_TRUE) {
-        return true;
-    }
-
-    GLint logLength = 0;
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-
-    std::string log(static_cast<std::size_t>(logLength), '\0');
-    GLsizei written = 0;
-    glGetProgramInfoLog(program, logLength, &written, log.data());
-    log.resize(static_cast<std::size_t>(written));
-    fmt::println(stderr, "Shader program link failed:\n{}", log);
-    return false;
 }

@@ -1,6 +1,7 @@
 #include "SDL3/SDL_events.h"
 #include "application.hpp"
 #include "debug_inspector.hpp"
+#include "debug_renderer.hpp"
 #include "ecs/fish_component.hpp"
 #include "ecs/food_component.hpp"
 #include "ecs/mesh_renderer_component.hpp"
@@ -11,6 +12,7 @@
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics/shader.hpp"
+#include <glad/gl.h>
 #include "math/vec3.hpp"
 #include "primitives/plane.hpp"
 #include "primitives/triangle.hpp"
@@ -29,12 +31,24 @@ int main() {
         return 1;
     }
 
+    auto debugRenderer = DebugRenderer::Create();
+    if (!debugRenderer) {
+        fmt::println(stderr, "Could not create debug renderer: {}", debugRenderer.error());
+        return 1;
+    }
+
     std::shared_ptr<World> world = std::make_shared<World>();
 
     auto shader = std::make_shared<Shader>();
-    shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
-    shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.frag"), GL_FRAGMENT_SHADER);
-    shader->Compile();
+    auto shaderVertex = shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"),
+                                    GL_VERTEX_SHADER);
+    auto shaderFragment = shaderVertex ? shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.frag"),
+                                                     GL_FRAGMENT_SHADER) : shaderVertex;
+    auto shaderLink = shaderFragment ? shader->Compile() : shaderFragment;
+    if (!shaderLink) {
+        fmt::println(stderr, "Could not create aquarium shader: {}", shaderLink.error());
+        return 1;
+    }
 
     auto material = std::make_shared<Material>(shader);
     auto triangle = std::make_shared<Mesh>(primitive::CreateTriangle());
@@ -48,9 +62,15 @@ int main() {
 
     // TODO: do the trigger box
     auto foodShader = std::make_shared<Shader>();
-    foodShader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
-    foodShader->Add(File::LoadFile("assets/shaders/common/solid.frag"), GL_FRAGMENT_SHADER);
-    foodShader->Compile();
+    auto foodVertex = foodShader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"),
+                                      GL_VERTEX_SHADER);
+    auto foodFragment = foodVertex ? foodShader->Add(File::LoadFile("assets/shaders/common/solid.frag"),
+                                                     GL_FRAGMENT_SHADER) : foodVertex;
+    auto foodLink = foodFragment ? foodShader->Compile() : foodFragment;
+    if (!foodLink) {
+        fmt::println(stderr, "Could not create food shader: {}", foodLink.error());
+        return 1;
+    }
     foodShader->SetVec3Uniform("color", math::Vec3{1.0F, 1.0F, 0.0F});
     auto foodMeshMaterial = std::make_shared<Material>(foodShader);
     auto foodMesh = std::make_shared<Mesh>(primitive::CreatePlane());
@@ -79,6 +99,10 @@ int main() {
         DebugInspector::Draw(fish.get());
 
         world->Update();
+
+        debugRenderer->DrawBox({{-0.5F, -0.5F, -0.5F}, {0.5F, 0.5F, 0.5F}},
+                               fish->transform->Model(), {0.0F, 1.0F, 0.0F});
+        debugRenderer->Render();
 
         app.EndFrame();
     }

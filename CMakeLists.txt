@@ -16,6 +16,8 @@ option(JIEL_ENABLE_WARNINGS "Enable compiler warnings" ON)
 option(JIEL_ENABLE_SANITIZERS
        "Enable address and undefined behavior sanitizers" OFF)
 
+include(CTest)
+
 include(cmake/CompilerWarnings.cmake)
 include(cmake/Dependencies.cmake)
 
@@ -26,6 +28,10 @@ if(JIEL_ENABLE_SANITIZERS
 endif()
 
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
 if(JIEL_BUILD_APPS)
     add_subdirectory(apps)

@@ -1,5 +1,7 @@
 add_library(jiel_engine STATIC
     application.cpp
+    debug_geometry.cpp
+    debug_renderer.cpp
     file.cpp
     fps_counter.cpp
     game_object.cpp
@@ -18,6 +20,7 @@ add_library(jiel_engine STATIC
     ${PROJECT_SOURCE_DIR}/include/ecs/mesh_renderer_component.hpp
     ${PROJECT_SOURCE_DIR}/include/ecs/transform_component.hpp
     ${PROJECT_SOURCE_DIR}/include/game_object.hpp
+    ${PROJECT_SOURCE_DIR}/include/debug_renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/primitives/plane.hpp
     ${PROJECT_SOURCE_DIR}/include/primitives/triangle.hpp
 )
