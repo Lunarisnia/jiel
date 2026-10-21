@@ -62,7 +62,15 @@ int main() {
     fish->AddComponent(fishComponent);
     world->AddGameObject(fish);
 
-    // TODO: do the trigger box
+    // TODO: Refactor plan
+    // 1. Split Update & Render tick, so that Update is exclusively for simulation and render is for
+    // rendering
+    // 2. Create a RenderableComponent inheriting from Component
+    // 3. Refactor gameobject to fit this new pattern
+    // 4. Add api to attach camera to meshRenderer
+    // 5. Have mesh renderer be responsible of its own draw call (setting MVP matrix)
+    // TODO: do camera
+    // TODO: trigger box is still shitty due to coordinate issue
     auto foodShader = std::make_shared<Shader>();
     auto foodVertex =
         foodShader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
