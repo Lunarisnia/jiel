@@ -4,6 +4,7 @@
 #include "ecs/fish_component.hpp"
 #include "ecs/food_component.hpp"
 #include "ecs/mesh_renderer_component.hpp"
+#include "ecs/triggerbox_component.hpp"
 #include "file.hpp"
 #include "fmt/base.h"
 #include "game_object.hpp"
@@ -28,7 +29,7 @@ int main() {
         return 1;
     }
 
-    World world{};
+    std::shared_ptr<World> world = std::make_shared<World>();
 
     auto shader = std::make_shared<Shader>();
     shader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
@@ -43,9 +44,8 @@ int main() {
     auto fish = std::make_shared<GameObject>();
     fish->AddComponent(meshRenderer);
     fish->AddComponent(fishComponent);
-    world.AddGameObject(fish);
+    world->AddGameObject(fish);
 
-    // TODO: handle draw order because zcoord does not seem to work?
     // TODO: do the trigger box
     auto foodShader = std::make_shared<Shader>();
     foodShader->Add(File::LoadFile("apps/aquarium/shaders/aquarium.vert"), GL_VERTEX_SHADER);
@@ -56,14 +56,16 @@ int main() {
     auto foodMesh = std::make_shared<Mesh>(primitive::CreatePlane());
     auto foodMeshRenderer = std::make_shared<MeshRendererComponent>(foodMesh, foodMeshMaterial);
     auto foodComponent = std::make_shared<FoodComponent>();
+    auto triggerBox = std::make_shared<TriggerBoxComponent>(world);
 
     auto food = std::make_shared<GameObject>();
     food->transform->position.z = 0.0f;
     food->AddComponent(foodMeshRenderer);
     food->AddComponent(foodComponent);
-    world.AddGameObject(food);
+    // food->AddComponent(triggerBox);
+    world->AddGameObject(food);
 
-    world.Init();
+    world->Init();
     bool running = true;
     while (running) {
         SDL_Event event;
@@ -76,7 +78,7 @@ int main() {
         app.BeginFrame();
         DebugInspector::Draw(fish.get());
 
-        world.Update();
+        world->Update();
 
         app.EndFrame();
     }
