@@ -17,5 +17,7 @@ void World::Update() {
 }
 
 void World::AddGameObject(std::shared_ptr<GameObject> gameObject) {
+    gameObject->ID = nextObjectId;
     GameObjects.emplace_back(gameObject);
+    nextObjectId++;
 }

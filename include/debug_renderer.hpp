@@ -35,6 +35,9 @@ class DebugRenderer {
     void DrawBox(const Bounds& localBounds, const math::Mat4& transform,
                  const math::Vec3& color = {1.0F, 1.0F, 1.0F},
                  DebugDepth depth = DebugDepth::Tested);
+    void DrawCircle(const math::Vec3& localCenter, float radius, const math::Mat4& transform,
+                    const math::Vec3& color = {1.0F, 1.0F, 1.0F},
+                    DebugDepth depth = DebugDepth::Tested);
 
     void Render();
 

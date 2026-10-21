@@ -10,6 +10,9 @@ class GameObject {
     std::vector<std::shared_ptr<Component>> components;
 
   public:
+    unsigned int ID;
+
+  public:
     GameObject();
 
     void Init();

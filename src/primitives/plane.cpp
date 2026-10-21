@@ -1,6 +1,5 @@
 #include "primitives/plane.hpp"
 #include "graphics/mesh.hpp"
-#include "math/vec3.hpp"
 #include <array>
 #include <cstdint>
 

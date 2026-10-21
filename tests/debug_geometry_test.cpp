@@ -1,5 +1,6 @@
 #include "debug_geometry.hpp"
 
+#include <cmath>
 #include <vector>
 
 namespace {
@@ -32,6 +33,32 @@ int main() {
         if (!Equal(vertex.color, color)) {
             return 1;
         }
+    }
+
+    vertices.clear();
+    debug_geometry::AppendCircle(vertices, {1.0F, 2.0F, 0.0F}, 2.0F, transform, color);
+    if (vertices.size() != 64 ||
+        !Equal(vertices.front().position, {6.0F, 6.0F, 5.0F}) ||
+        !Equal(vertices.back().position, vertices.front().position)) {
+        return 1;
+    }
+    for (std::size_t index = 0; index < vertices.size(); index += 2) {
+        const math::Vec3& point = vertices[index].position;
+        const float dx = point.x - 4.0F;
+        const float dy = point.y - 6.0F;
+        if (std::abs(dx * dx + dy * dy - 4.0F) > 0.0001F || point.z != 5.0F ||
+            !Equal(vertices[index].color, color) ||
+            !Equal(vertices[index + 1].color, color) ||
+            (index > 0 && !Equal(vertices[index - 1].position, point))) {
+            return 1;
+        }
+    }
+
+    vertices.clear();
+    debug_geometry::AppendCircle(vertices, {}, 0.0F, transform, color);
+    debug_geometry::AppendCircle(vertices, {}, -1.0F, transform, color);
+    if (!vertices.empty()) {
+        return 1;
     }
 
     return 0;

@@ -4,6 +4,9 @@
 #include <memory>
 #include <vector>
 class World {
+  private:
+    unsigned int nextObjectId = 1;
+
   public:
     std::vector<std::shared_ptr<GameObject>> GameObjects;
 

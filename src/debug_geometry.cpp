@@ -3,7 +3,9 @@
 #include "math/vec4.hpp"
 
 #include <array>
+#include <cmath>
 #include <cstddef>
+#include <numbers>
 
 namespace {
 math::Vec3 TransformPoint(const math::Mat4& transform, const math::Vec3& point) {
@@ -44,6 +46,29 @@ void AppendBox(std::vector<MeshVertex>& vertices, const Bounds& bounds,
     for (const auto& edge : edges) {
         AppendLine(vertices, TransformPoint(transform, corners[edge[0]]),
                    TransformPoint(transform, corners[edge[1]]), color);
+    }
+}
+
+void AppendCircle(std::vector<MeshVertex>& vertices, const math::Vec3& center, float radius,
+                  const math::Mat4& transform, const math::Vec3& color) {
+    if (!(radius > 0.0F) || !std::isfinite(radius)) {
+        return;
+    }
+
+    constexpr int segments = 32;
+    constexpr float fullTurn = 2.0F * std::numbers::pi_v<float>;
+    for (int index = 0; index < segments; ++index) {
+        const float angle = fullTurn * static_cast<float>(index) / static_cast<float>(segments);
+        const float nextAngle =
+            fullTurn * static_cast<float>(index + 1) / static_cast<float>(segments);
+        const math::Vec3 start{center.x + radius * std::cos(angle),
+                               center.y + radius * std::sin(angle), center.z};
+        const math::Vec3 end = index + 1 == segments
+                                   ? math::Vec3{center.x + radius, center.y, center.z}
+                                   : math::Vec3{center.x + radius * std::cos(nextAngle),
+                                                center.y + radius * std::sin(nextAngle), center.z};
+        AppendLine(vertices, TransformPoint(transform, start), TransformPoint(transform, end),
+                   color);
     }
 }
 

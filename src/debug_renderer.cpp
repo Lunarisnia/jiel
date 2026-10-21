@@ -11,12 +11,14 @@
 std::expected<DebugRenderer, std::string> DebugRenderer::Create() {
     try {
         Shader shader;
-        if (auto result = shader.Add(File::LoadFile("assets/shaders/debug/debug.vert"),
-                                     GL_VERTEX_SHADER); !result) {
+        if (auto result =
+                shader.Add(File::LoadFile("assets/shaders/debug/debug.vert"), GL_VERTEX_SHADER);
+            !result) {
             return std::unexpected(result.error());
         }
-        if (auto result = shader.Add(File::LoadFile("assets/shaders/debug/debug.frag"),
-                                     GL_FRAGMENT_SHADER); !result) {
+        if (auto result =
+                shader.Add(File::LoadFile("assets/shaders/debug/debug.frag"), GL_FRAGMENT_SHADER);
+            !result) {
             return std::unexpected(result.error());
         }
         if (auto result = shader.Compile(); !result) {
@@ -44,8 +46,14 @@ void DebugRenderer::DrawLine(const math::Vec3& start, const math::Vec3& end,
 
 void DebugRenderer::DrawBox(const Bounds& localBounds, const math::Mat4& transform,
                             const math::Vec3& color, DebugDepth depth) {
-    debug_geometry::AppendBox(batch(depth),
-                              {localBounds.minimum, localBounds.maximum}, transform, color);
+    debug_geometry::AppendBox(batch(depth), {localBounds.minimum, localBounds.maximum}, transform,
+                              color);
+}
+
+void DebugRenderer::DrawCircle(const math::Vec3& localCenter, float radius,
+                               const math::Mat4& transform, const math::Vec3& color,
+                               DebugDepth depth) {
+    debug_geometry::AppendCircle(batch(depth), localCenter, radius, transform, color);
 }
 
 void DebugRenderer::Render() {
@@ -70,8 +78,7 @@ std::vector<MeshVertex>& DebugRenderer::batch(DebugDepth depth) {
     return batches[debug_geometry::BatchIndex(depth)];
 }
 
-void DebugRenderer::drawBatch(Mesh& mesh, std::vector<MeshVertex>& vertices,
-                              bool depthTested) {
+void DebugRenderer::drawBatch(Mesh& mesh, std::vector<MeshVertex>& vertices, bool depthTested) {
     if (vertices.empty()) {
         return;
     }
