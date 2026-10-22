@@ -1,18 +1,13 @@
 #pragma once
 
 #include "ecs/component.hpp"
-#include "ecs/mesh_renderer_component.hpp"
 #include "math/mat4.hpp"
 #include "math/vec3.hpp"
 
 #include <cmath>
-#include <memory>
 #include <numbers>
 
 class TransformComponent : public Component {
-  private:
-    std::shared_ptr<MeshRendererComponent> meshRenderer;
-
   public:
     math::Vec3 position{};
     math::Vec3 rotation{};
@@ -60,6 +55,4 @@ class TransformComponent : public Component {
         return translationMatrix * rotationZ * rotationY * rotationX * scaleMatrix;
     }
 
-    void Init() override;
-    void Update() override;
 };

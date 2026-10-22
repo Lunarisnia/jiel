@@ -16,6 +16,12 @@ void World::Update() {
     }
 }
 
+void World::Render() {
+    for (const auto& object : GameObjects) {
+        object->Render();
+    }
+}
+
 void World::AddGameObject(std::shared_ptr<GameObject> gameObject) {
     gameObject->ID = nextObjectId;
     GameObjects.emplace_back(gameObject);

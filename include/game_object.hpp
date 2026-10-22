@@ -17,6 +17,7 @@ class GameObject {
 
     void Init();
     void Update();
+    void Render();
 
     template <typename T> [[nodiscard]] std::shared_ptr<T> GetComponent() const {
         for (const auto& component : components) {

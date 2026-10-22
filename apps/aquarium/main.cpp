@@ -62,14 +62,7 @@ int main() {
     fish->AddComponent(fishComponent);
     world->AddGameObject(fish);
 
-    // TODO: Refactor plan
-    // 1. Split Update & Render tick, so that Update is exclusively for simulation and render is for
-    // rendering
-    // 2. Create a RenderableComponent inheriting from Component
-    // 3. Refactor gameobject to fit this new pattern
-    // 4. Add api to attach camera to meshRenderer
-    // 5. Have mesh renderer be responsible of its own draw call (setting MVP matrix)
-    // TODO: do camera
+    // TODO: have some way to detect current active camera
     // TODO: trigger box is still shitty due to coordinate issue
     auto foodShader = std::make_shared<Shader>();
     auto foodVertex =
@@ -111,6 +104,7 @@ int main() {
         DebugInspector::Draw(fish.get());
 
         world->Update();
+        world->Render();
 
         debugRenderer->Render();
 

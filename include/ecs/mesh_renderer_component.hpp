@@ -1,22 +1,22 @@
 #pragma once
 
-#include "ecs/component.hpp"
+#include "ecs/renderable_component.hpp"
 #include "graphics/material.hpp"
 #include "graphics/mesh.hpp"
 
 #include <memory>
 #include <utility>
 
-class MeshRendererComponent : public Component {
+class MeshRendererComponent : public RenderableComponent {
   public:
-    MeshRendererComponent() : Component("MeshRendererComponent") {}
+    MeshRendererComponent() : RenderableComponent("MeshRendererComponent") {}
     MeshRendererComponent(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
-        : Component("MeshRendererComponent"), mesh(std::move(mesh)), material(std::move(material)) {}
+        : RenderableComponent("MeshRendererComponent"), mesh(std::move(mesh)),
+          material(std::move(material)) {}
 
     std::shared_ptr<Mesh> mesh{};
     std::shared_ptr<Material> material{};
 
   public:
-    void Init() override;
-    void Update() override;
+    void Render() override;
 };

@@ -15,6 +15,7 @@ class World {
 
     void Init();
     void Update();
+    void Render();
 
     void AddGameObject(std::shared_ptr<GameObject> gameObject);
 };

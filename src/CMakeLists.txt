@@ -7,9 +7,9 @@ add_library(jiel_engine STATIC
     game_object.cpp
     mesh_loader.cpp
     time.cpp
+    ecs/camera_component.cpp
     ecs/component.cpp
     ecs/mesh_renderer_component.cpp
-    ecs/transform_component.cpp
     graphics/graphics.cpp
     graphics/material.cpp
     graphics/mesh.cpp
@@ -17,7 +17,9 @@ add_library(jiel_engine STATIC
     primitives/plane.cpp
     primitives/triangle.cpp
     ${PROJECT_SOURCE_DIR}/include/ecs/component.hpp
+    ${PROJECT_SOURCE_DIR}/include/ecs/camera_component.hpp
     ${PROJECT_SOURCE_DIR}/include/ecs/mesh_renderer_component.hpp
+    ${PROJECT_SOURCE_DIR}/include/ecs/renderable_component.hpp
     ${PROJECT_SOURCE_DIR}/include/ecs/transform_component.hpp
     ${PROJECT_SOURCE_DIR}/include/game_object.hpp
     ${PROJECT_SOURCE_DIR}/include/debug_renderer.hpp

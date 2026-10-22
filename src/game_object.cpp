@@ -1,5 +1,6 @@
 #include "game_object.hpp"
 #include "ecs/component.hpp"
+#include "ecs/renderable_component.hpp"
 
 GameObject::GameObject() : transform(std::make_shared<TransformComponent>()) {
     AddComponent(transform);
@@ -14,6 +15,14 @@ void GameObject::Init() {
 void GameObject::Update() {
     for (auto c : components) {
         c->Update();
+    }
+}
+
+void GameObject::Render() {
+    for (const auto& component : components) {
+        if (auto* renderable = dynamic_cast<RenderableComponent*>(component.get())) {
+            renderable->Render();
+        }
     }
 }
 
