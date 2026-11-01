@@ -2,6 +2,7 @@
 #include "application.hpp"
 #include "debug_inspector.hpp"
 #include "debug_renderer.hpp"
+#include "ecs/camera_component.hpp"
 #include "ecs/fish_component.hpp"
 #include "ecs/food_component.hpp"
 #include "ecs/mesh_renderer_component.hpp"
@@ -89,6 +90,14 @@ int main() {
     food->AddComponent(foodComponent);
     food->AddComponent(triggerBox);
     world->AddGameObject(food);
+
+    // TODO: I got distracted, basically connect cam component to this
+    // Then somehow make this fetchable by every mesh renderer out there and have it enter the
+    // shader uniform
+    // auto camera = std::make_shared<GameObject>();
+    // auto cameraComponent = std::make_shared<CameraComponent>();
+    // camera
+    //     ->AddComponent(cameraComponent)
 
     world->Init();
     bool running = true;
